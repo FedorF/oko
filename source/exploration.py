@@ -1,6 +1,5 @@
 import pandas as pd
 import json
-import matplotlib
 from matplotlib import pyplot as plt
 import seaborn as sns
 import missingno as msno
@@ -24,8 +23,8 @@ PATH_PLOTS = './plots'
 transactions = pd.read_csv(PATH_TRANSACTIONS)
 ratings = pd.read_csv(PATH_RATINGS)
 bookmarks = pd.read_csv(PATH_BOOKMARKS)
-# catalogue = pd.DataFrame.from_dict(read_json(PATH_CATALOGUE), orient='index')
-catalogue = pd.read_csv('./data/catalogue.csv')
+catalogue = pd.DataFrame.from_dict(read_json(PATH_CATALOGUE), orient='index')
+# catalogue = pd.read_csv('./data/catalogue.csv')
 test_users = read_json(PATH_TEST)['users']
 
 #  Catalogue EDA
@@ -128,8 +127,8 @@ transactions['is_consumed'] = transactions['consumption_mode'].map({'P': 1,
 transactions = transactions.merge(catalogue[['element_uid', 'type', 'duration']], on='element_uid')
 
 mask = (transactions['consumption_mode'] == 'S') & \
-                    ((transactions['type'] == 'movie') | (transactions['type'] == 'multipart_movie')) & \
-                    (transactions['watched_time'] > (transactions['duration'] / 2))
+       ((transactions['type'] == 'movie') | (transactions['type'] == 'multipart_movie')) & \
+       (transactions['watched_time'] > (transactions['duration'] / 2))
 
 transactions.loc[mask, ['is_consumed']] = 1
 
@@ -139,16 +138,15 @@ mask_series_subscribe = (transactions['consumption_mode'] == 'S') & \
 
 transactions.loc[mask_series_subscribe, ['is_consumed']] = 1
 
-
 transactions['user_uid'] = transactions['user_uid'].astype('category')
 transactions['element_uid'] = transactions['element_uid'].astype('category')
 
 consumption_matrix = sparse.coo_matrix(
     (transactions['is_consumed'], (
-            transactions['element_uid'].cat.codes.copy(),
-            transactions['user_uid'].cat.codes.copy()
-        )
+        transactions['element_uid'].cat.codes.copy(),
+        transactions['user_uid'].cat.codes.copy()
     )
+     )
 )
 
 consumption_matrix = consumption_matrix.tocsr()
